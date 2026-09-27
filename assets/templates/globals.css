@@ -1,0 +1,362 @@
+@import "tailwindcss";
+@import "lenis/dist/lenis.css";
+
+/*
+ * Reduced motion = OS preference, unless the <html data-motion> override says otherwise.
+ * data-motion="reduce" forces it on; data-motion="full" forces it off (used by /styleguide).
+ */
+@custom-variant reduced {
+  @media (prefers-reduced-motion: reduce) {
+    &:where(:root:not([data-motion="full"]) *, :root:not([data-motion="full"])) {
+      @slot;
+    }
+  }
+  &:where([data-motion="reduce"] *, [data-motion="reduce"]) {
+    @slot;
+  }
+}
+
+/*
+ * The inverse: JS is running AND motion is allowed. Scroll-driven layouts (tall sticky stages)
+ * are opted into with this, so no-JS and reduced-motion both get the plain static layout.
+ */
+@custom-variant motion-ok {
+  @media (prefers-reduced-motion: no-preference) {
+    &:where(:root.js:not([data-motion="reduce"]) *) {
+      @slot;
+    }
+  }
+  &:where(:root.js[data-motion="full"] *) {
+    @slot;
+  }
+}
+
+/*
+ * Scroll tracks of the pinned scenes: the tall box a sticky stage rides on. The length is set
+ * inline on the element (--track, and --track-md from 48rem up), so this one rule never
+ * changes; only with JS and motion allowed, like motion-ok. A missing track would collapse the
+ * scene to a single screen, so it deliberately doesn't depend on per-value utility classes.
+ */
+@layer components {
+  @media (prefers-reduced-motion: no-preference) {
+    :root.js:not([data-motion="reduce"]) [data-track] {
+      height: var(--track);
+
+      @media (min-width: 48rem) {
+        height: var(--track-md, var(--track));
+      }
+    }
+  }
+
+  :root.js[data-motion="full"] [data-track] {
+    height: var(--track);
+
+    @media (min-width: 48rem) {
+      height: var(--track-md, var(--track));
+    }
+  }
+
+  /* Lead-in space above a section that slides in sideways (SlideInSheet): extra scroll during
+     which it keeps sliding while the section before stays frozen. Set inline as --sheet-lead. */
+  @media (prefers-reduced-motion: no-preference) {
+    :root.js:not([data-motion="reduce"]) [data-sheet-lead] {
+      margin-top: var(--sheet-lead);
+    }
+  }
+
+  :root.js[data-motion="full"] [data-sheet-lead] {
+    margin-top: var(--sheet-lead);
+  }
+}
+
+/*
+ * Phone mockup states, driven by attributes on an ancestor: set statically (hero) or by
+ * StickyStory as the reader reaches each step. Pure CSS, so the mockups never hydrate.
+ */
+@custom-variant mock-found (&:where([data-found] *));
+@custom-variant mock-desired (&:where([data-desired] *));
+@custom-variant mock-ordered (&:where([data-ordered] *));
+
+/* JS is running (set before first paint in the root layout). */
+@custom-variant js (&:where(:root.js *));
+
+/* Styles for content that sits on a dark Section (data-nav-theme="dark"). */
+@custom-variant on-dark (&:where([data-nav-theme="dark"] *));
+
+/* Brand palette — the only colors available in the design system. */
+@theme {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-white: #ffffff;
+
+  --color-maple-red: #800000;
+  --color-maple-red-deep: #660000;
+  --color-maple-gold: #d4ae76;
+  --color-maple-ink: #222222;
+  --color-maple-ink-soft: #2e2e2d;
+  --color-maple-paper: #e1e3db;
+  --color-maple-paper-light: #eef0ea;
+  --color-maple-paper-deep: #d3d6cc;
+  /* Secondary text: ≥ 4.5:1 on every paper tone / every ink tone. */
+  --color-maple-muted: #575953;
+  --color-maple-muted-inverse: #9c9e96;
+  --color-maple-line: rgb(34 34 34 / 0.12);
+  --color-maple-line-inverse: rgb(225 227 219 / 0.14);
+
+  --radius-*: initial;
+  --radius-sm: 12px;
+  --radius-card: 24px;
+  --radius-pill: 999px;
+
+  --container-site: 80rem;
+
+  --ease-maple: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Chapter transitions (sheets, clip reveals): slow in, slow out. */
+  --ease-maple-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+
+  /* CSS-only entrance for small above-the-fold details (never on LCP candidates). */
+  --animate-fade-up: maple-fade-up var(--duration-slow) var(--ease-maple) both;
+
+  @keyframes maple-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(1.5rem);
+    }
+  }
+
+  /* A band of light sweeping once across its box, left to right. */
+  --animate-glint: maple-glint 1.1s var(--ease-maple) both;
+
+  @keyframes maple-glint {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(300%);
+    }
+  }
+
+  /* Type scale: display sizes are fluid, tracking tightens as size grows. */
+  --text-display-xl: clamp(3rem, 0.9rem + 9.6vw, 11.25rem);
+  --text-display-xl--line-height: 0.9;
+  --text-display-xl--letter-spacing: -0.05em;
+  --text-display-lg: clamp(2.5rem, 0.9rem + 6.4vw, 7.5rem);
+  --text-display-lg--line-height: 0.94;
+  --text-display-lg--letter-spacing: -0.045em;
+  --text-display-md: clamp(2.125rem, 1rem + 4vw, 5rem);
+  --text-display-md--line-height: 1;
+  --text-display-md--letter-spacing: -0.035em;
+  --text-title: clamp(1.625rem, 1.2rem + 1.6vw, 2.75rem);
+  --text-title--line-height: 1.08;
+  --text-title--letter-spacing: -0.025em;
+  --text-lead: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
+  --text-lead--line-height: 1.4;
+  --text-lead--letter-spacing: -0.012em;
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.5;
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.3;
+  --text-label--letter-spacing: 0.08em;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-serif: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  --font-display: var(--font-bodoni-moda), var(--font-instrument-serif), Georgia, serif;
+}
+
+:root {
+  /* Mirrors DURATION in lib/motion.ts. */
+  --duration-fast: 600ms;
+  --duration-base: 900ms;
+  --duration-slow: 1200ms;
+  /* Space the floating capsule claims: 0.75rem offset + 3.25rem capsule + breathing room. */
+  --nav-height: 4.25rem;
+  /* Top corners of the dark "sheets" that slide over the previous chapter. */
+  --sheet-radius: clamp(1.5rem, 0.8rem + 2.4vw, 3rem);
+  --gutter: clamp(1rem, 0.4rem + 3vw, 3rem);
+  /* Left edge of .container-site content, for full-bleed rows that must align with it. */
+  --edge: max(var(--gutter), calc((100vw - var(--container-site)) / 2));
+}
+
+@layer base {
+  html {
+    background-color: var(--color-maple-paper);
+
+    /* Set by the navbar to the tone of the section on screen (see Navbar). */
+    &[data-page-tone="dark"] {
+      background-color: var(--color-maple-ink);
+    }
+
+    color: var(--color-maple-ink);
+    scroll-padding-top: var(--nav-height);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply font-sans text-body;
+    background-color: var(--color-maple-paper);
+  }
+
+  /*
+   * Paper grain over the whole page: one static, GPU-composited layer (no blend mode, so it
+   * never forces a repaint on scroll). Gives the flat brand colors the tooth of a printed menu.
+   */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    pointer-events: none;
+    opacity: 0.032;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  ::selection {
+    background-color: var(--color-maple-red);
+    color: var(--color-white);
+  }
+
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Native smooth anchors only when Lenis is not driving the scroll. */
+  @media (prefers-reduced-motion: no-preference) {
+    html:not(.lenis):not([data-motion="reduce"]) {
+      scroll-behavior: smooth;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html:not([data-motion="full"]) *,
+    html:not([data-motion="full"]) *::before,
+    html:not([data-motion="full"]) *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+
+  [data-motion="reduce"] *,
+  [data-motion="reduce"] *::before,
+  [data-motion="reduce"] *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@utility container-site {
+  width: 100%;
+  max-width: calc(var(--container-site) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/*
+ * Phone mockup frame: as tall as --phone-h (set by the parent layout), capped at 22rem / 88vw
+ * wide. 1em = 1/20 of the frame width, so the UI inside is authored in em and scales crisply
+ * with the frame instead of being transformed. Deliberately not container queries: size
+ * containment made the first layout of the page ~2x slower.
+ */
+@utility phone-frame {
+  --phone-w: min(22rem, calc(var(--phone-h, 80svh) * 9 / 19.5), 88vw);
+  width: var(--phone-w);
+  aspect-ratio: 9 / 19.5;
+  font-size: calc(var(--phone-w) / 20);
+}
+
+/*
+ * Text link whose underline draws in from the left on hover and retracts to the right on
+ * leave. Uses background-size, so it wraps across lines and costs no layout.
+ */
+@utility link-draw {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
+  background-size: 0% 1px;
+  padding-bottom: 0.08em;
+  transition: background-size var(--duration-fast) var(--ease-maple);
+
+  @media (hover: hover) {
+    &:hover {
+      background-position: 0% 100%;
+      background-size: 100% 1px;
+    }
+  }
+  &:focus-visible {
+    background-position: 0% 100%;
+    background-size: 100% 1px;
+  }
+}
+
+/* A chapter that slides over the previous one like a sheet: rounded top, drawn above it. */
+@utility sheet {
+  position: relative;
+  z-index: 1;
+  border-top-left-radius: var(--sheet-radius);
+  border-top-right-radius: var(--sheet-radius);
+}
+
+/*
+ * Thermal receipt paper: warm off-white with the faint banding of the print head, and a
+ * serrated edge top and bottom where it was torn off the roll. The teeth are cut with a mask
+ * (so shadows must come from a drop-shadow filter on a parent).
+ */
+@utility receipt-paper {
+  --tooth: 0.75rem;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 3px, rgb(34 34 34 / 0.018) 3px 4px),
+    linear-gradient(to bottom, #f4f1ea, #ebe7dd);
+  mask:
+    conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / var(--tooth)
+      calc(var(--tooth) / 2) repeat-x,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / var(--tooth)
+      calc(var(--tooth) / 2) repeat-x,
+    linear-gradient(#000 0 0) center / 100% calc(100% - var(--tooth)) no-repeat;
+}
+
+@utility duration-fast {
+  --tw-duration: var(--duration-fast);
+  transition-duration: var(--duration-fast);
+}
+
+@utility duration-base {
+  --tw-duration: var(--duration-base);
+  transition-duration: var(--duration-base);
+}
+
+@utility duration-slow {
+  --tw-duration: var(--duration-slow);
+  transition-duration: var(--duration-slow);
+}
+
+/*
+ * RevealText: hidden only when JS is running and motion is allowed, so the text is
+ * never lost without JS and never flashes before the reveal takes over.
+ */
+@layer components {
+  .js [data-reveal]:not([data-reveal="ready"]) {
+    visibility: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .js:not([data-motion="full"]) [data-reveal] {
+      visibility: visible;
+    }
+  }
+
+  .js[data-motion="reduce"] [data-reveal] {
+    visibility: visible;
+  }
+}

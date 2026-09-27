@@ -1,0 +1,20 @@
+# Templates de referência (código real do site Maple Tech)
+
+Next.js App Router + TypeScript + Tailwind 4 + GSAP + Lenis. Adapte nomes, cores e conteúdo à nova marca; os imports usam `@/lib/...` e `@/components/...` do projeto original.
+
+| Arquivo                                                        | Para que serve                                                                                                                                                                 |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `lib/motion.ts`                                                | Easing único, durações, stagger, constantes de ritmo                                                                                                                           |
+| `lib/gsap.ts`                                                  | Registro único de plugins + CustomEase da marca                                                                                                                                |
+| `globals.css`                                                  | Tokens (cor, tipo fluido, raios), variantes `motion-ok`/`reduced`, trilho `data-track`, `data-sheet-lead`, grão de papel, `sheet`, `link-draw`, `receipt-paper`, tom do `html` |
+| `motion/MotionProvider.tsx`                                    | Lenis + ticker do GSAP, `reduced`, refresh após fontes                                                                                                                         |
+| `motion/FreezeBehind.tsx`                                      | Congela a seção que sai (recua e escurece)                                                                                                                                     |
+| `motion/SlideInSheet.tsx`                                      | Nova seção entra de lado sobre a congelada                                                                                                                                     |
+| `motion/RevealText`, `ScrubText`, `ScrollScale`, `StickyStory` | Revelações por linha, texto aceso no scroll, imagem que cresce até full-bleed, mídia fixa com etapas                                                                           |
+| `layout/useNavTheme.ts`, `Navbar.tsx`                          | Navbar cápsula que troca de tema pela seção embaixo                                                                                                                            |
+| `cenas/ProblemStage.tsx`                                       | Mergulho na letra (zoom medido em métricas reais da fonte)                                                                                                                     |
+| `cenas/SolutionsIris.tsx`                                      | O Diafragma (lâminas SVG)                                                                                                                                                      |
+| `cenas/HungerClock.tsx`                                        | O Relógio da Fome (luz da página mudando com a hora)                                                                                                                           |
+| `cenas/MethodDrum.tsx`                                         | O Tambor tipográfico 3D                                                                                                                                                        |
+| `cenas/StatsStage.tsx`                                         | A Comanda (impressora térmica + odômetro)                                                                                                                                      |
+| `cenas/HeroVideo.tsx`                                          | Vídeo de hero: fade do preto, pausa fora da tela, estático em movimento reduzido                                                                                               |
